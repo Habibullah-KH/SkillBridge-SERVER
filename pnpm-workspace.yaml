@@ -1,0 +1,8 @@
+allowBuilds:
+  esbuild: false
+  workerd: true
+permissions:
+  '@prisma/orm-postgres':
+    skills: true
+  prisma:
+    skills: true
