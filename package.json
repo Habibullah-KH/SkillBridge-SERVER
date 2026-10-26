@@ -6,7 +6,7 @@
   "scripts": {
     "db:emit": "prisma contract emit",
     "db:init": "prisma db init",
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch src/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "contract:emit": "prisma contract emit"
   },
