@@ -1,0 +1,4 @@
+// model Tutor {
+// id String @id @default(uuid())
+// userId String 
+// }
