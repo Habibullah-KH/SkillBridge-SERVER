@@ -3,10 +3,14 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "typecheck": "bun check"
+    "typecheck": "bun check",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "bun --watch src/server.ts",
+    "seed:admin": "bun src/script/seedAdmin.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/express": "^5.0.6",
     "@types/node": "^26.6.6",
     "@types/pg": "^8.23.1",
     "prisma": "^7.10.1",
@@ -21,6 +25,7 @@
     "@prisma/client": "7",
     "better-auth": "^1.7.16",
     "dotenv": "^18.0.9",
+    "express": "^5.3.0",
     "pg": "^8.23.1"
   }
 }
