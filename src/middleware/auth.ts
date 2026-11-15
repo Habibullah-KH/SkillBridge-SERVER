@@ -4,7 +4,7 @@ import { fromNodeHeaders } from 'better-auth/node';
 
 export enum UserRole {
         STUDENT = "STUDENT",
-        TEACHER = "TEACHER",
+        TUTOR = "TUTOR",
         ADMIN = "ADMIN"
 }
 
@@ -31,9 +31,9 @@ const auth = (...roles: UserRole[]) => {
             next()
         }
         catch(error){
-            return res.status(403).json({
+            return res.status(500).json({
                 success: false,
-                message: error
+                message: "Auth checked failed! :("
             })
         }
     }
