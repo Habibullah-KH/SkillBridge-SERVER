@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import {auth as authFromLib} from "../lib/auth"
+import { fromNodeHeaders } from 'better-auth/node';
 
 export enum UserRole {
         STUDENT = "STUDENT",
@@ -7,11 +8,25 @@ export enum UserRole {
         ADMIN = "ADMIN"
 }
 
-const auth = (...role: UserRole[]) => {
-    return (req: Request, res: Response, next: NextFunction) => {
+const auth = (...roles: UserRole[]) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
         try{
-            const session = authFromLib.api.getSession({headers: req.headers})
+            const session = await authFromLib.api.getSession({headers: fromNodeHeaders(req.headers)})
             console.log(session);
+
+            if(!session){
+                return res.status(401).json({
+                    success: false,
+                    message: "unauthorized"
+                })
+            }
+
+            if(roles.length && !roles.includes(session.user.role as UserRole)){
+                return res.status(403).json({
+                    success: false,
+                    message: "forbidden"
+                })
+            }
 
             next()
         }

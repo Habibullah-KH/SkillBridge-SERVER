@@ -13,7 +13,7 @@ export const auth = betterAuth({
         type: "string",
         defaultValue: "STUDENT",
         required: false,
-        input: false
+        input: false,
       },
       phone: {
         type: "string",
@@ -23,12 +23,12 @@ export const auth = betterAuth({
         type: "string",
         defaultValue: "ACTIVE",
         required: false,
-        input: false
-      }
-
-    }
+        input: false,
+      },
+    },
   },
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
   },
 });
