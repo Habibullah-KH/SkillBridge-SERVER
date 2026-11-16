@@ -1,4 +1,13 @@
-// model Tutor {
-// id String @id @default(uuid())
-// userId String 
-// }
+model Tutor {
+id String @id @default(uuid())
+headline String
+bio String
+hourlyRate Decimal
+experienceYears Int
+isFeatured Boolean
+avgRating Float
+reviewCount Int
+userId String 
+user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+}
