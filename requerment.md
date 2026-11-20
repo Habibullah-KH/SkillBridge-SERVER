@@ -1,4 +1,4 @@
-# SkillBridge — Online Tutor Booking & Learning Marketplace Platform
+# SkillBridge — Online Tutor Booking
 
 # Project Requirements Specification
 
