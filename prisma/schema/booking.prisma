@@ -1,0 +1,23 @@
+model Booking {
+  id          String        @id @default(uuid())
+  studentId   String
+  tutorId     String
+  subject     String
+  sessionDate DateTime      @db.Date
+  startTime   String        
+  endTime     String        
+  totalPrice  Float
+  status      BookingStatus @default(CONFIRMED)
+  notes       String?       @db.Text
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  student User @relation("StudentBookings", fields: [studentId], references: [id], onDelete: Cascade)
+  tutor   TutorProfile @relation("TutorBookings", fields: [tutorId], references: [id], onDelete: Cascade)
+  review  Review?
+
+  @@index([studentId])
+  @@index([tutorId, sessionDate, status])
+  @@map("bookings")
+}
