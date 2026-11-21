@@ -1,7 +1,10 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { prisma } from "./prisma"; // your prisma client instance
+import { prisma } from "./prisma";
 import nodemailer from "nodemailer";
+import { APIError, createAuthMiddleware } from "better-auth/api";
+
+const ALLOWED_SIGNUP_ROLES = new Set(["STUDENT", "TUTOR"]);
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -23,7 +26,8 @@ export const auth = betterAuth({
       role: {
         type: "string",
         defaultValue: "STUDENT",
-        input: false,
+        required: false,
+        input: true, // Allowed on sign-up, strictly validated in hooks.before below
       },
       phone: {
         type: "string",
@@ -33,9 +37,27 @@ export const auth = betterAuth({
         type: "string",
         defaultValue: "ACTIVE",
         required: false,
-        input: false,
+        input: false, // Never allow user to set status on sign-up
       },
     },
+  },
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path === "/sign-up/email" && ctx.body) {
+        const body = ctx.body as Record<string, unknown>;
+
+        if (body.role !== undefined) {
+          if (
+            typeof body.role !== "string" ||
+            !ALLOWED_SIGNUP_ROLES.has(body.role)
+          ) {
+            throw new APIError("BAD_REQUEST", {
+              message: "Invalid role. Only STUDENT or TUTOR can register.",
+            });
+          }
+        }
+      }
+    }),
   },
   emailAndPassword: {
     enabled: true,
@@ -45,14 +67,13 @@ export const auth = betterAuth({
   emailVerification: {
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
-    sendVerificationEmail: async ({ user, url, token }, request) => {
-      // console.log("user :", user, "URL :", url, "TOKEN :", token);
+    sendVerificationEmail: async ({ user, token }) => {
       try {
         const verificationUrl = `${process.env.APP_URL}/verify-email?token=${token}`;
         const info = await transporter.sendMail({
-          from: "Skillbridge", // sender address
-          to: user.email, // list of recipients
-          subject: "Please verify your mail", // subject line
+          from: `"SkillBridge" <${process.env.SMTP_USER}>`,
+          to: user.email,
+          subject: "Please verify your email - SkillBridge",
           html: `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -69,7 +90,7 @@ export const auth = betterAuth({
           <!-- Header -->
           <tr>
             <td align="center" style="background-color:#4f46e5; padding:28px 24px;">
-              <h1 style="margin:0; font-size:22px; color:#ffffff;">Prisma Blog</h1>
+              <h1 style="margin:0; font-size:22px; color:#ffffff;">SkillBridge</h1>
             </td>
           </tr>
 
@@ -79,7 +100,7 @@ export const auth = betterAuth({
               <h2 style="margin:0 0 12px; font-size:20px; color:#111111;">Verify your email address</h2>
               <p style="margin:0 0 16px;">Hi ${user.name || "there"},</p>
               <p style="margin:0 0 24px;">
-                Thanks for signing up! Please confirm your email address by clicking the button below.
+                Thanks for signing up for SkillBridge! Please confirm your email address by clicking the button below.
               </p>
 
               <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto 24px;">
@@ -109,7 +130,7 @@ export const auth = betterAuth({
           <!-- Footer -->
           <tr>
             <td align="center" style="background-color:#f9fafb; padding:16px; font-size:12px; color:#999999;">
-              &copy; ${new Date().getFullYear()} Prisma Blog. All rights reserved.
+              © ${new Date().getFullYear()} SkillBridge. All rights reserved.
             </td>
           </tr>
 
@@ -122,8 +143,6 @@ export const auth = betterAuth({
         });
 
         console.log("Message sent: %s", info.messageId);
-        // Preview URL is only available when using an Ethereal test account
-        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
       } catch (err) {
         console.error("Error while sending mail:", err);
       }
